@@ -2,14 +2,37 @@ const lastSeenForm = document.getElementById('last-seen-form');
 // STEP 2: Add `handleAddRecord` event listener on form's submit events
 lastSeenForm.addEventListener('submit', handleAddRecord);
 
+function fetchRecords(){
+  return fetch('/api/records')
+    .then((response)=>response.json())
+    .then((sightings) => {
+      console.log('fetchRecords ', sightings);
+      for(const location of sightings){
+        addLastSeen({location});
+      }
+  });
+}
+
+fetchRecords();
+
+function saveRecord(record){
+  return fetch('/api/records', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(record)
+  }).then((response)=>response.json());
+}
+
 // Helper functions
 function handleAddRecord(event) {
   event.preventDefault();
 
   const record = getRecordFromForm(event);
   
-  // STEP 3: Replace alert function with addLastSeen
+  // // STEP 3: Replace alert function with addLastSeen
   addLastSeen(record);
+
+  saveRecord(record);
 
   // STEP 6: Clear text input
   jasdo
@@ -45,5 +68,6 @@ function createLastSeenItem(record) {
 function getRecordFromForm(event) {
   const formData = new FormData(event.currentTarget);
   const data = Object.fromEntries(formData.entries());
+  console.log('record: ', data);
   return data;
 }
